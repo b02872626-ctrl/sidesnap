@@ -55,6 +55,7 @@
           <span class="pill pill-status">
             <button class="menubar-icon" id="menuIcon" aria-label="Show Sidesnap menu" aria-expanded="false" aria-controls="panel">
               <svg class="stack-glyph" viewBox="0 0 24 24" aria-hidden="true"><rect x="7" y="3" width="14" height="11" rx="2"/><path d="M3 8v10a2 2 0 0 0 2 2h12"/></svg>
+              <svg class="ok-glyph" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>
             </button>
             <svg class="pill-glyph" viewBox="0 0 24 24" aria-hidden="true"><path d="M3.5 9.5a12 12 0 0 1 17 0M6.5 12.5a7.5 7.5 0 0 1 11 0M9.5 15.5a3 3 0 0 1 5 0"/><circle cx="12" cy="18.5" r="0.6"/></svg>
             <span class="menubar-clock" id="clock"></span>
@@ -72,47 +73,76 @@
             <i style="--h:63%"></i><i style="--h:55%"></i><i style="--h:79%"></i><i class="hi" style="--h:92%"></i>
           </div>
           <div class="window-foot">
-            <span>Press <kbd id="kOpt">⌥</kbd> <kbd id="kShift">⇧</kbd> <kbd id="kS">S</kbd> to take a pretend screenshot</span>
+            <span>Press <kbd id="kOpt">⌥</kbd> <kbd id="kShift">⇧</kbd> <kbd id="kS">S</kbd> and drag over this window, or <kbd>⌥</kbd> <kbd>S</kbd> for the whole screen</span>
             <span>Nothing is saved or sent.</span>
           </div>
         </div>
 
-        <!-- Selecting an area -->
-        <div class="selection" id="selection" aria-hidden="true"><span id="selSize">412 × 238</span></div>
-        <div class="flash" id="flash" aria-hidden="true"></div>
+        <!-- Sidesnap itself, at its real sizes, scaled down to fit this little screen -->
+        <div class="screen" id="screen">
+          <div class="scr" id="scr">
+            <div class="fan" id="fan">
+              <label class="search glass">
+                <svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="7" cy="7" r="4.6"/><path d="M10.4 10.4 14 14"/></svg>
+                <input id="search" type="text" placeholder="Search text in screenshots" autocomplete="off" spellcheck="false" aria-label="Search text in screenshots">
+                <button class="clear" id="searchClear" aria-label="Clear search" hidden><svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="7"/><path d="M5.5 5.5l5 5m0-5-5 5"/></svg></button>
+              </label>
+              <p class="empty glass" id="empty" hidden></p>
+              <div class="list" id="list" aria-label="Screenshots on the shelf"></div>
+            </div>
 
-        <!-- The card that shows right after a capture -->
-        <div class="corner-card" id="cornerCard" aria-hidden="true">
-          <div class="thumb mini-chart"><i></i><i></i><i></i><i></i><i></i><i></i></div>
-          <div class="card-row"><strong>Weekly sign-ups</strong><span class="copied">Copied</span></div>
+            <div class="tab glass hidden" id="tab" title="Click to copy the latest screenshot. Hover to see recent ones.">
+              <div class="thumb" id="tabThumb"></div>
+              <span id="tabLabel">3 on shelf</span>
+            </div>
+
+            <div class="card-wrap" id="card">
+              <div class="layer l2"></div><div class="layer l1"></div>
+              <div class="card">
+                <div class="thumb" id="cardThumb" title="Click to copy again, double-click to edit."></div>
+                <div class="card-row">
+                  <div class="txt"><strong id="cardTitle"></strong><span class="sub" id="cardSub"></span></div>
+                  <button class="ib" id="cardEdit" title="Edit" aria-label="Edit"><svg viewBox="0 0 16 16"><path d="M10.6 2.6l2.8 2.8-7.8 7.8H2.8v-2.8z M9.2 4l2.8 2.8"/></svg></button>
+                  <button class="ib" id="cardSave" title="Save as a file" aria-label="Save as a file"><svg viewBox="0 0 16 16"><path d="M8 2v8m-3-3 3 3 3-3M3 9.5V13h10V9.5"/></svg></button>
+                  <button class="ib" id="cardClose" title="Close" aria-label="Close"><svg viewBox="0 0 16 16"><path d="M4.5 4.5l7 7m0-7-7 7"/></svg></button>
+                </div>
+              </div>
+            </div>
+
+            <div class="hud glass" id="hud" aria-live="polite"><strong id="hudTitle"></strong><span id="hudDetail"></span></div>
+            <div class="ctx glass" id="ctx" role="menu"></div>
+
+            <div class="pick" id="pick">
+              <div class="winhl" id="winHl"></div>
+              <div class="sel" id="sel"><span class="size" id="selSize"></span></div>
+              <div class="hint" id="hint"></div>
+            </div>
+          </div>
         </div>
 
-        <!-- The shelf on the right edge: hover it to fan out recent shots -->
-        <div class="edge" id="edge">
-          <div class="fan" aria-label="Recent screenshots">
-            <div class="shot s-doc"><i></i></div>
-            <div class="shot s-photo"><i></i></div>
-            <div class="shot s-terminal"><i></i></div>
-          </div>
-          <div class="tab">
-            <div class="shot tab-shot s-terminal" id="tabShot"><i></i></div>
-            <span id="tabCount">3 on shelf</span>
-          </div>
+        <!-- On narrow screens: a still picture of the shelf -->
+        <div class="medge" aria-hidden="true">
+          <div class="mfan"><div class="shot s-doc"><i></i></div><div class="shot s-photo"><i></i></div></div>
+          <div class="mtab"><div class="shot s-terminal"><i></i></div><span id="mCount">3 on shelf</span></div>
         </div>
 
         <!-- Sidesnap's menu -->
-        <div class="panel hidden" id="panel" role="menu" aria-label="Sidesnap menu">
-          <button class="menu-row" role="menuitem" id="menuCapture"><span>Capture Area</span><kbd>⌥⇧S</kbd></button>
-          <div class="menu-row dim" role="menuitem"><span>Capture Full Screen</span><kbd>⌥S</kbd></div>
-          <div class="menu-row dim" role="menuitem"><span>Copy Text from Screen</span><kbd>⌥⇧T</kbd></div>
+        <div class="panel menu hidden" id="panel" role="menu" aria-label="Sidesnap menu">
+          <button class="mi" role="menuitem" data-act="area"><span>Capture Area</span><span class="sc">⌥⇧S</span></button>
+          <button class="mi" role="menuitem" data-act="window"><span>Capture Window</span><span class="sc">⌥⇧2</span></button>
+          <button class="mi" role="menuitem" data-act="full"><span>Capture Full Screen</span><span class="sc">⌥S</span></button>
+          <button class="mi" role="menuitem" data-act="text"><span>Copy Text from Area</span><span class="sc">⌥⇧T</span></button>
           <hr>
-          <div class="menu-row dim" role="menuitem"><span>Check for Updates…</span></div>
-          <div class="menu-row dim" role="menuitem"><span>Settings…</span><kbd>⌘,</kbd></div>
+          <button class="mi" role="menuitemcheckbox" aria-checked="false" data-act="pause" id="pauseRow"><span class="ck">✓</span><span>Pause Shelf History</span></button>
           <hr>
-          <div class="panel-row small-text"><span>Version 1.0</span><span>Quit Sidesnap</span></div>
+          <div class="mi dim" role="menuitem"><span>Check for Updates…</span></div>
+          <div class="mi dim" role="menuitem"><span>Settings…</span><span class="sc">⌘,</span></div>
+          <div class="mi dim" role="menuitem"><span>Welcome…</span></div>
+          <div class="mi dim" role="menuitem"><span>About Sidesnap</span></div>
+          <div class="mi dim" role="menuitem"><span>Quit Sidesnap</span><span class="sc">⌘Q</span></div>
         </div>
       </div>
-      <p class="stage-hint">Press ⌥⇧S, or click the Sidesnap icon in the menu bar. Then point at the right edge.</p>
+      <p class="stage-hint"><span class="hint-keys">Try it: press ⌥⇧S and drag, or use the Sidesnap menu. Then point at the right edge of the screen.</span><span class="hint-touch">On a Mac, try it here: press ⌥⇧S and drag over the window.</span></p>
     </section>
 
     <!-- What it does -->

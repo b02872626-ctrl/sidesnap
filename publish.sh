@@ -85,7 +85,7 @@ rm -f site/updates/Sidesnap-*.dmg                 # only the newest is served
 cp "$DMG" "site/updates/Sidesnap-$VERSION.dmg"
 cp "$DMG" site/downloads/Sidesnap.dmg
 # The line under the download button: "Version 1.0 · 3.1 MB · macOS 14 or later"
-sed -i '' -E "s/Version [0-9]+(\.[0-9]+)* · [0-9.]+ MB/Version $VERSION · $SIZE_MB MB/g; s#<span>Version [0-9]+(\.[0-9]+)*</span>#<span>Version $VERSION</span>#g" site/index.html
+sed -i '' -E "s/Version [0-9]+(\.[0-9]+)* · [0-9.]+ MB/Version $VERSION · $SIZE_MB MB/g" site/index.html
 
 if [ "$DRY" = "--dry-run" ]; then
     git checkout -- Resources/Info.plist site/index.html 2>/dev/null || true

@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Report a security or privacy problem (private)
+    url: https://github.com/b02872626-ctrl/sidesnap/security/advisories/new
+    about: Please don't report these in public issues.
+  - name: Download Sidesnap
+    url: https://sidesnap.typewellapp.workers.dev
+    about: The official, signed app with automatic updates.

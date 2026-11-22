@@ -1,0 +1,27 @@
+{
+  // Cloudflare deploy settings for the Sidesnap download page.
+  // Static files in site/ are served directly. A small Worker
+  // (worker/index.js) runs first only for downloads, /admin and /api/*,
+  // to count downloads per day and serve the password-protected stats.
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "sidesnap",
+  "main": "worker/index.js",
+  "compatibility_date": "2026-11-17",
+  // The page promises no personal data, so request logs stay off.
+  "observability": { "enabled": false },
+  "assets": {
+    "directory": "site",
+    "binding": "ASSETS",
+    "run_worker_first": ["/downloads/*", "/admin", "/admin/*", "/api/*"]
+  },
+  // One table: downloads(day, count). See migrations/.
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "sidesnap-stats",
+      "database_id": "12da7668-6ecd-4d18-a790-fbc2602df8c7",
+      "migrations_dir": "migrations"
+    }
+  ]
+  // ADMIN_PASSWORD is a secret, set with: npx wrangler secret put ADMIN_PASSWORD
+}

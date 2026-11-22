@@ -1,0 +1,288 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Sidesnap: every screenshot, on a shelf at the edge of your Mac</title>
+  <meta name="description" content="A free Mac app: every screenshot is copied and kept on a shelf at the edge of your screen, ready to drag into any app. Nothing leaves your Mac.">
+  <meta name="color-scheme" content="light dark">
+  <meta property="og:title" content="Sidesnap: every screenshot, on a shelf at the edge of your Mac">
+  <meta property="og:description" content="Take a screenshot and it's already copied. Your recent shots wait at the edge of your screen, ready to drag into any app.">
+  <meta property="og:type" content="website">
+  <meta name="theme-color" content="#f4f1ec" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#141416" media="(prefers-color-scheme: dark)">
+  <link rel="icon" href="favicon.png" type="image/png">
+  <link rel="apple-touch-icon" href="icon.png">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+  <!-- Site navigation -->
+  <header class="menubar" role="banner">
+    <a class="menubar-app" href="#top">
+      <img class="app-icon-small" src="icon.png" alt="">Sidesnap
+    </a>
+    <nav class="menubar-links" aria-label="Sections">
+      <a href="#privacy">Privacy</a>
+      <a href="#install">Install</a>
+      <a href="#faq">FAQ</a>
+      <a class="nav-github" href="https://github.com/b02872626-ctrl/sidesnap" target="_blank" rel="noopener" aria-label="Sidesnap on GitHub" title="Open source on GitHub"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0C6 2 5 2 5 2c-.3 1.15-.3 2.35 0 3.5A5.4 5.4 0 0 0 4 9c0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.65-.17.6-.22 1.23-.15 1.85v4"/><path d="M9 18c-4.51 2-5-2-7-2"/></svg></a>
+      <a class="nav-download" href="downloads/Sidesnap.dmg" download>Download</a>
+    </nav>
+  </header>
+
+  <main id="top">
+    <!-- Hero -->
+    <section class="hero">
+      <div class="hero-copy">
+        <h1>Every screenshot, on a&nbsp;shelf at the&nbsp;edge.</h1>
+        <div class="cta">
+          <a class="button primary" href="downloads/Sidesnap.dmg" download id="download">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v11m0 0-4.5-4.5M12 15l4.5-4.5M5 19h14"/></svg>
+            Download for Mac
+          </a>
+          <a class="button ghost" href="#install">How to install</a>
+        </div>
+        <p class="fineprint">Free · Version 1.0 · 2.4 MB · Apple silicon &amp; Intel · macOS 14 Sonoma or later · No account, no personal data</p>
+      </div>
+
+      <!-- A small Mac desktop: menu bar, a window to capture, Sidesnap's menu and its shelf at the edge -->
+      <div class="stage-wrap" id="stageWrap">
+        <div class="stage" aria-hidden="true"></div>
+
+        <div class="stage-bar">
+          <span class="pill"><strong>Sidesnap</strong></span>
+          <span class="pill pill-status">
+            <button class="menubar-icon" id="menuIcon" aria-label="Show Sidesnap menu" aria-expanded="false" aria-controls="panel">
+              <svg class="stack-glyph" viewBox="0 0 24 24" aria-hidden="true"><rect x="7" y="3" width="14" height="11" rx="2"/><path d="M3 8v10a2 2 0 0 0 2 2h12"/></svg>
+            </button>
+            <svg class="pill-glyph" viewBox="0 0 24 24" aria-hidden="true"><path d="M3.5 9.5a12 12 0 0 1 17 0M6.5 12.5a7.5 7.5 0 0 1 11 0M9.5 15.5a3 3 0 0 1 5 0"/><circle cx="12" cy="18.5" r="0.6"/></svg>
+            <span class="menubar-clock" id="clock"></span>
+          </span>
+        </div>
+
+        <!-- The window you take a screenshot of -->
+        <div class="window demo-window shot-target" id="target">
+          <div class="window-bar">
+            <span class="lights" aria-hidden="true"><i></i><i></i><i></i></span>
+            <span class="window-title">Weekly sign-ups</span>
+          </div>
+          <div class="chart" aria-hidden="true">
+            <i style="--h:34%"></i><i style="--h:46%"></i><i style="--h:41%"></i><i style="--h:58%"></i>
+            <i style="--h:63%"></i><i style="--h:55%"></i><i style="--h:79%"></i><i class="hi" style="--h:92%"></i>
+          </div>
+          <div class="window-foot">
+            <span>Press <kbd id="kOpt">⌥</kbd> <kbd id="kShift">⇧</kbd> <kbd id="kS">S</kbd> to take a pretend screenshot</span>
+            <span>Nothing is saved or sent.</span>
+          </div>
+        </div>
+
+        <!-- Selecting an area -->
+        <div class="selection" id="selection" aria-hidden="true"><span id="selSize">412 × 238</span></div>
+        <div class="flash" id="flash" aria-hidden="true"></div>
+
+        <!-- The card that shows right after a capture -->
+        <div class="corner-card" id="cornerCard" aria-hidden="true">
+          <div class="thumb mini-chart"><i></i><i></i><i></i><i></i><i></i><i></i></div>
+          <div class="card-row"><strong>Weekly sign-ups</strong><span class="copied">Copied</span></div>
+        </div>
+
+        <!-- The shelf on the right edge: hover it to fan out recent shots -->
+        <div class="edge" id="edge">
+          <div class="fan" aria-label="Recent screenshots">
+            <div class="shot s-doc"><i></i></div>
+            <div class="shot s-photo"><i></i></div>
+            <div class="shot s-terminal"><i></i></div>
+          </div>
+          <div class="tab">
+            <div class="shot tab-shot s-terminal" id="tabShot"><i></i></div>
+            <span id="tabCount">3 on shelf</span>
+          </div>
+        </div>
+
+        <!-- Sidesnap's menu -->
+        <div class="panel hidden" id="panel" role="menu" aria-label="Sidesnap menu">
+          <button class="menu-row" role="menuitem" id="menuCapture"><span>Capture Area</span><kbd>⌥⇧S</kbd></button>
+          <div class="menu-row dim" role="menuitem"><span>Capture Full Screen</span><kbd>⌥S</kbd></div>
+          <div class="menu-row dim" role="menuitem"><span>Copy Text from Screen</span><kbd>⌥⇧T</kbd></div>
+          <hr>
+          <div class="menu-row dim" role="menuitem"><span>Check for Updates…</span></div>
+          <div class="menu-row dim" role="menuitem"><span>Settings…</span><kbd>⌘,</kbd></div>
+          <hr>
+          <div class="panel-row small-text"><span>Version 1.0</span><span>Quit Sidesnap</span></div>
+        </div>
+      </div>
+      <p class="stage-hint">Press ⌥⇧S, or click the Sidesnap icon in the menu bar. Then point at the right edge.</p>
+    </section>
+
+    <!-- What it does -->
+    <section class="features" aria-label="What it does">
+      <article>
+        <h3>Copied the moment you let go</h3>
+        <p>Select an area with ⌥⇧S, press Space to pick a window instead, or take the whole screen with ⌥S.</p>
+      </article>
+      <article>
+        <h3>A shelf at the edge</h3>
+        <p>Your shots wait at the right edge of the screen. Point at it, then drag one or several into Slack, Mail or Finder.</p>
+      </article>
+      <article>
+        <h3>Find shots by their words</h3>
+        <p>Search the text inside every screenshot, or grab text and QR codes straight off the screen with ⌥⇧T.</p>
+      </article>
+      <article>
+        <h3>Mark it up</h3>
+        <p>Arrows, boxes, text, speech bubbles, blur, highlights and numbered steps. Your marks stay editable.</p>
+      </article>
+    </section>
+
+    <!-- Privacy -->
+    <section class="section privacy" id="privacy">
+      <h2>Your screenshots <em>never</em> leave your Mac.</h2>
+      <p class="section-lede">They're kept in a folder on your Mac and cleared after 30 days, unless you pin them. Even reading the words inside them happens on your Mac.</p>
+
+      <div class="facts">
+        <div>
+          <h3>No account, no tracking</h3>
+          <p>No sign-up, no analytics, nothing sent about you or what you capture.</p>
+        </div>
+        <div>
+          <h3>One small update check</h3>
+          <p>Once a day Sidesnap fetches a small file to see if there's a new version. You can turn that off in Settings.</p>
+        </div>
+        <div>
+          <h3>Looks only when asked</h3>
+          <p>Screen access is used only when you press a capture shortcut. Pause the shelf any time, and captures go to the clipboard only.</p>
+        </div>
+      </div>
+      <p class="site-note">About this website: it counts downloads of Sidesnap as a plain number per day. Nothing about you is stored (no IP address, no browser details, no cookies).</p>
+    </section>
+
+    <!-- Install: three small illustrated steps -->
+    <section class="section" id="install">
+      <h2>Install in about a minute</h2>
+      <p class="section-lede">Sidesnap is free and not signed through Apple's paid developer program, so macOS asks you to confirm it once.</p>
+
+      <div class="install-stage" id="installStage">
+        <div class="window mini-win" data-step="1">
+          <div class="window-bar">
+            <span class="lights" aria-hidden="true"><i></i><i></i><i></i></span>
+            <span class="window-title">Sidesnap</span>
+          </div>
+          <div class="dmg" aria-hidden="true">
+            <div class="dmg-row">
+            <div class="dmg-item">
+              <img class="drag-icon" src="icon.png" alt="">
+              <small>Sidesnap</small>
+            </div>
+            <svg class="dmg-arrow" viewBox="0 0 64 20"><path class="dots" d="M2 10h50"/><path class="head" d="M52 4l7 6-7 6"/></svg>
+            <div class="dmg-item">
+              <span class="folder">
+                <svg viewBox="0 0 64 52">
+                  <path class="folder-back" d="M4 8a4 4 0 0 1 4-4h16l6 6h26a4 4 0 0 1 4 4v30a4 4 0 0 1-4 4H8a4 4 0 0 1-4-4z"/>
+                  <path class="folder-front" d="M4 16a4 4 0 0 1 4-4h48a4 4 0 0 1 4 4v28a4 4 0 0 1-4 4H8a4 4 0 0 1-4-4z"/>
+                  <g class="folder-glyph"><rect x="23" y="20" width="7.5" height="7.5" rx="2"/><rect x="33.5" y="20" width="7.5" height="7.5" rx="2"/><rect x="23" y="30.5" width="7.5" height="7.5" rx="2"/><rect x="33.5" y="30.5" width="7.5" height="7.5" rx="2"/></g>
+                </svg>
+                <svg class="alias" viewBox="0 0 12 12"><rect width="12" height="12" rx="2.5"/><path d="M4 8.5 8 4.5M5 4.5h3v3"/></svg>
+              </span>
+              <small>Applications</small>
+            </div>
+            </div>
+            <p class="dmg-caption">Drag Sidesnap into Applications</p>
+          </div>
+        </div>
+        <div class="window mini-win" data-step="2">
+          <div class="window-bar">
+            <span class="lights" aria-hidden="true"><i></i><i></i><i></i></span>
+            <span class="window-title">Settings</span>
+          </div>
+          <div class="settings" aria-hidden="true">
+            <p class="settings-head">Privacy &amp; Security</p>
+            <div class="settings-row">
+              <span>“Sidesnap” was blocked.</span>
+              <span class="fake-button">Open Anyway</span>
+            </div>
+          </div>
+        </div>
+        <div class="window mini-win" data-step="3">
+          <div class="window-bar">
+            <span class="lights" aria-hidden="true"><i></i><i></i><i></i></span>
+            <span class="window-title">Screen Recording</span>
+          </div>
+          <div class="settings" aria-hidden="true">
+            <div class="settings-row dim"><span class="row-name"><span class="row-icon"></span><span class="bar-ph"></span></span><span class="fake-toggle on"></span></div>
+            <div class="settings-row target"><span class="row-name"><img src="icon.png" alt="">Sidesnap</span><span class="fake-toggle"></span></div>
+          </div>
+        </div>
+      </div>
+
+      <ol class="install-steps">
+        <li data-step="1">
+          <span class="num">1</span>
+          <div>
+            <h3>Drag it into Applications</h3>
+            <p>Open <code>Sidesnap.dmg</code> and drag Sidesnap onto the Applications folder.</p>
+          </div>
+        </li>
+        <li data-step="2">
+          <span class="num">2</span>
+          <div>
+            <h3>Click Open Anyway</h3>
+            <p>Open Sidesnap once. Then in System Settings → Privacy &amp; Security, click Open Anyway.</p>
+          </div>
+        </li>
+        <li data-step="3">
+          <span class="num">3</span>
+          <div>
+            <h3>Switch on Screen Recording</h3>
+            <p>Let Sidesnap see the screen when you capture, then press ⌥⇧S.</p>
+          </div>
+        </li>
+      </ol>
+    </section>
+
+    <!-- FAQ -->
+    <section class="section" id="faq">
+      <h2>Questions</h2>
+      <div class="faq">
+        <details>
+          <summary>Is it really free?</summary>
+          <p>Yes. No trial, no ads, no in-app purchases.</p>
+        </details>
+        <details>
+          <summary>Is it open source?</summary>
+          <p>Yes. The code is on <a href="https://github.com/b02872626-ctrl/sidesnap" target="_blank" rel="noopener">GitHub</a> under the MIT licence, so you can check exactly what it does with your screen.</p>
+        </details>
+        <details>
+          <summary>Why does it need Screen Recording?</summary>
+          <p>macOS only lets an app capture the screen with your permission. Sidesnap uses it only when you press a capture shortcut. See <a href="#privacy">Privacy</a>.</p>
+        </details>
+        <details>
+          <summary>Why does macOS warn me when I open it?</summary>
+          <p>Apps outside the App Store are checked against a paid Apple developer account. Sidesnap is free and doesn't have one yet, so macOS asks you to confirm. Follow the <a href="#install">install steps</a>.</p>
+        </details>
+        <details>
+          <summary>Where do my screenshots go?</summary>
+          <p>Onto the shelf and your clipboard, never your Desktop. They're cleared after 30 days unless you pin them; you can change that in Settings, or save any one as a file.</p>
+        </details>
+        <details>
+          <summary>Can I change the shortcuts?</summary>
+          <p>Yes, in Settings › Shortcuts. The defaults are ⌥⇧S for an area, ⌥S for the whole screen and ⌥⇧T to copy text.</p>
+        </details>
+        <details>
+          <summary>How do I uninstall it?</summary>
+          <p>Click <strong>Quit Sidesnap</strong> in its menu, drag Sidesnap from Applications to the Trash, and if you like, delete the folder <code>~/Library/Application Support/Sidesnap</code> where the shelf lives.</p>
+        </details>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <p>Sidesnap · For people who take a lot of screenshots.</p>
+    <p class="muted">Open source under the MIT licence. <a href="https://github.com/b02872626-ctrl/sidesnap" target="_blank" rel="noopener">Read the code on GitHub</a>.</p>
+    <p class="muted">Desktop photo: NASA (ISS, Expedition 64). Use does not imply NASA endorsement.</p>
+    <p class="muted">Mac and macOS are trademarks of Apple Inc. Sidesnap is not affiliated with Apple.</p>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,42 @@
+name: Bug report
+description: Something isn't working (a capture fails, the shelf misbehaves, a crash...)
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for reporting! Please **don't attach screenshots that show private things** (messages, passwords, documents). Crop or blur them first, or describe the problem instead.
+        Security or privacy problems: please report privately instead (see SECURITY.md).
+  - type: input
+    id: sidesnap
+    attributes:
+      label: Sidesnap version
+      description: Sidesnap menu › About Sidesnap.
+      placeholder: "1.0"
+    validations:
+      required: true
+  - type: input
+    id: macos
+    attributes:
+      label: macOS version
+      placeholder: "macOS 15.2"
+    validations:
+      required: true
+  - type: input
+    id: displays
+    attributes:
+      label: Displays
+      placeholder: "MacBook screen only / MacBook + one external display"
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened, and what did you expect?
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to make it happen
+      placeholder: |
+        1. Press ⌥⇧S
+        2. ...

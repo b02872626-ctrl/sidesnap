@@ -1,0 +1,10 @@
+*.mov
+*.mp4
+.DS_Store
+.wrangler/
+Vendor/
+build/
+dist/
+node_modules/
+site/downloads/
+site/updates/

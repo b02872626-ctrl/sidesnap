@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<rss version="2.0" xmlns:sparkle="http://www.andymatuschak.org/xml-namespaces/sparkle">
+  <channel>
+    <title>Sidesnap</title>
+    <link>https://sidesnap.typewellapp.workers.dev</link>
+    <description>Sidesnap updates</description>
+    <language>en</language>
+    <item>
+      <title>Sidesnap 1.0</title>
+      <pubDate>Sun, 22 Nov 2026 14:35:15 +0000</pubDate>
+      <sparkle:version>2</sparkle:version>
+      <sparkle:shortVersionString>1.0</sparkle:shortVersionString>
+      <sparkle:minimumSystemVersion>14.0</sparkle:minimumSystemVersion>
+      <description><![CDATA[<ul>
+<li>Capture an area (⌥⇧S, Space switches to a window) or the whole screen (⌥S). Every shot is copied and kept on a shelf at the right edge of your screen.</li>
+<li>Hover the edge to see recent shots; drag them into any app, search the text inside them, or copy text and QR codes straight from the screen (⌥⇧T).</li>
+<li>Edit with arrows, boxes, text, speech bubbles, blur, highlights and numbered steps. Marks stay changeable.</li>
+<li>Everything stays on your Mac. The only thing Sidesnap fetches is its update feed, and you can turn that off.</li>
+</ul>]]></description>
+      <enclosure url="https://sidesnap.typewellapp.workers.dev/updates/Sidesnap-1.0.dmg" type="application/octet-stream" sparkle:edSignature="DhzAs8lxldb3ki6rdhEnXi6wwwr+oC7WvEXDtACMCmoZXx5m2l+9ONid8KLUzzZDHIuJFQbBIlP4gGDm/GRDAg==" length="2437442" />
+    </item>
+  </channel>
+</rss>

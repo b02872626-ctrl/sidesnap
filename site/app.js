@@ -53,11 +53,12 @@
   const fmtTime = (t) => new Date(t).toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" });
 
   const target = $("target");
+  const chatWin = $("chatWin");
   const bar = document.querySelector(".stage-bar");
 
   // A picture of the screen right now: the desktop photo plus copies of what's
   // on it. Like the app, Sidesnap's own card and shelf are left out.
-  function snapshot(kind) {
+  function snapshot(kind, win) {
     const world = document.createElement("div");
     world.className = "world";
     world.style.width = W + "px";
@@ -67,12 +68,14 @@
       bg.className = "world-bg";
       world.append(bg);
     }
-    for (const el of kind === "Window" ? [target] : [target, bar]) {
+    for (const el of kind === "Window" ? [win] : [target, chatWin, bar]) {
       const r = rectOf(el);
       const c = el.cloneNode(true);
       c.removeAttribute("id");
       c.querySelectorAll("[id]").forEach((n) => n.removeAttribute("id"));
       c.querySelectorAll(".down").forEach((n) => n.classList.remove("down"));
+      c.querySelectorAll("[contenteditable]").forEach((n) => n.removeAttribute("contenteditable"));
+      c.classList.remove("nudge", "drop");
       c.classList.add("clone");
       Object.assign(c.style, {
         left: r.x + "px", top: r.y + "px", width: r.pw + "px", height: r.ph + "px",
@@ -160,9 +163,12 @@
     start = cur = null;
     pick.className = "pick on" + (m === "window" ? " win" : "");
     hint.textContent = HINTS[m];
-    const r = rectOf(target);
-    Object.assign(winHl.style, { left: r.x + "px", top: r.y + "px", width: r.w + "px", height: r.h + "px", borderRadius: 14 / s + "px" });
     winHl.classList.remove("on");
+  }
+  // The window under the pointer, front one first.
+  function windowAt(p) {
+    for (const el of [chatWin, target]) { const r = rectOf(el); if (r.w && inside(p, r)) return { el, r }; }
+    return null;
   }
   function endPick() { mode = null; start = null; pick.className = "pick"; }
   function switchMode() {
@@ -189,8 +195,8 @@
     e.preventDefault();
     const p = toLocal(e.clientX, e.clientY);
     if (mode === "window") {
-      const r = rectOf(target);
-      if (inside(p, r)) { endPick(); capture("Window", r); }
+      const w = windowAt(p);
+      if (w) { endPick(); capture("Window", w.r, w.el); }
       return;
     }
     pick.setPointerCapture(e.pointerId);
@@ -198,7 +204,12 @@
   });
   pick.addEventListener("pointermove", (e) => {
     const p = toLocal(e.clientX, e.clientY);
-    if (mode === "window") { winHl.classList.toggle("on", inside(p, rectOf(target))); return; }
+    if (mode === "window") {
+      const w = windowAt(p);
+      winHl.classList.toggle("on", !!w);
+      if (w) Object.assign(winHl.style, { left: w.r.x + "px", top: w.r.y + "px", width: w.r.w + "px", height: w.r.h + "px", borderRadius: 14 / s + "px" });
+      return;
+    }
     if (!start) return;
     cur = p;
     drawSel();
@@ -215,7 +226,7 @@
   // The words on the page inside an area (stands in for reading the pixels).
   function textIn(r) {
     const els = [target.querySelector(".window-title"), ...target.querySelectorAll(".window-foot > span"),
-      bar.querySelector("strong"), $("clock")];
+      bar.querySelector("strong"), $("clock"), chatWin.querySelector(".window-title"), ...chatLog.querySelectorAll(":scope > .msg:not(.pic)")];
     const parts = [];
     for (const el of els) {
       if (!el) continue;
@@ -233,14 +244,17 @@
     showHud(lines === 1 ? "Copied text" : `Copied ${lines} lines of text`, t.slice(0, 80), r);
   }
 
-  function capture(kind, rect) {
-    const world = snapshot(kind);
+  function capture(kind, rect, win) {
+    const world = snapshot(kind, win);
     flashIcon();
-    if (paused) return;   // Pause Shelf History: clipboard only, nothing kept
     const title = kind === "Screen" ? "Full screen"
-      : kind === "Window" || overlaps(rect, rectOf(target)) ? "Weekly sign-ups" : "Screenshot";
+      : kind === "Window" ? win.querySelector(".window-title").textContent
+      : overlaps(rect, rectOf(target)) ? "Weekly sign-ups" : overlaps(rect, rectOf(chatWin)) ? "Team chat" : "Screenshot";
     const item = { id: nextId++, kind, title, rect: { x: rect.x, y: rect.y, w: rect.w, h: rect.h }, world,
       text: textIn(rect), time: Date.now() };
+    setClip(item);   // every capture is copied, like the app
+    stepDone(1);
+    if (paused) return;   // Pause Shelf History: clipboard only, nothing kept
     items.unshift(item);
     showCard(item, rect);
   }
@@ -330,7 +344,7 @@
   let thumbClick;
   cardThumb.addEventListener("click", () => {
     clearTimeout(thumbClick);
-    thumbClick = setTimeout(() => setNote("Copied"), 220);
+    thumbClick = setTimeout(() => { setNote("Copied"); if (cardItem) setClip(cardItem); }, 220);
   });
   cardThumb.addEventListener("dblclick", () => { clearTimeout(thumbClick); editorNote(rectOf(card)); });
   $("cardEdit").addEventListener("click", () => editorNote(rectOf(card)));
@@ -379,6 +393,7 @@
 
   function showFan() {
     if (fanShown || cardShowing || !items.length) return;
+    stepDone(3);
     fanShown = true;
     fan.classList.add("open");
     buildList(true);
@@ -433,6 +448,7 @@
   const itemOf = (el) => items.find((i) => i.id === Number(el.dataset.id));
 
   function markCopied(it) {
+    setClip(it);
     copiedId = it.id;
     clearTimeout(copiedTimer);
     refreshCopied();
@@ -565,6 +581,7 @@
     if (!own && dock === "tab" && !cardShowing && items.length) setDock("sliver");
   });
   document.addEventListener("pointerup", () => { pointerDown = false; });
+  document.addEventListener("dragend", () => { pointerDown = false; });
 
   // ---------- Menu actions and shortcuts ----------
 
@@ -628,6 +645,140 @@
     if (e.code === "KeyS") light("kS", false);
   });
   window.addEventListener("blur", () => ["kOpt", "kShift", "kS"].forEach((id) => light(id, false)));
+
+  // ---------- The clipboard and the chat ----------
+  // A pretend screenshot can't go on your real clipboard as a picture, so the
+  // page keeps it and puts a short marker text there instead. Pasting a real
+  // screenshot (from Sidesnap or macOS) works too: it only appears here.
+
+  const CLIP_MARK = "Sidesnap demo screenshot";
+  let clip = null;
+  function setClip(item) {
+    clip = item;
+    copyString(CLIP_MARK);
+    if (!stepIsDone(2)) chatWin.classList.add("nudge");
+  }
+
+  const chatLog = $("chatLog"), composer = $("composer");
+  const replies = ["Perfect, thanks!", "Got it, that's the one.", "Nice, sharing it with the team.", "Thanks!"];
+  let replyN = 0, replyTimer;
+
+  // Draws a shelf screenshot into a box of at most bw × bh page pixels.
+  function pictureOf(item, bw, bh) {
+    const box = document.createElement("div");
+    box.className = "pic-box";
+    if (item.art) {
+      box.style.width = bw + "px"; box.style.height = bw * 135 / 216 + "px";
+      const a = document.createElement("div");
+      a.className = "art " + item.art;
+      a.innerHTML = "<i></i>";
+      a.style.cssText = `position:absolute;left:0;top:0;width:216px;height:135px;transform:scale(${bw / 216});transform-origin:0 0`;
+      box.append(a);
+      return box;
+    }
+    const { x, y, w, h } = item.rect;
+    const k = Math.min(bw / w, bh / h);
+    box.style.width = w * k + "px"; box.style.height = h * k + "px";
+    const world = item.world.cloneNode(true);
+    world.style.transform = `translate(${-x * k}px, ${-y * k}px) scale(${k})`;
+    box.append(world);
+    return box;
+  }
+  function addMsg(cls, content) {
+    const m = document.createElement("div");
+    m.className = "msg " + cls;
+    if (typeof content === "string") m.textContent = content; else m.append(content);
+    chatLog.append(m);
+    chatLog.scrollTop = chatLog.scrollHeight;
+    return m;
+  }
+  function sendPicture(node) {
+    addMsg("me pic", node);
+    chatWin.classList.remove("nudge");
+    stepDone(2);
+    clearTimeout(replyTimer);
+    replyTimer = setTimeout(() => {
+      const m = addMsg("them", replies[replyN++ % replies.length]);
+      m.insertAdjacentHTML("afterbegin", "<b>Maya</b>");
+    }, 1100);
+  }
+  function sendItem(item) { if (item) sendPicture(pictureOf(item, 180, 120)); }
+  function sendFile(file) {
+    const img = new Image();
+    img.alt = "Pasted screenshot";
+    img.src = URL.createObjectURL(file);
+    sendPicture(img);
+  }
+
+  // ⌘V in the chat, or anywhere on the demo when nothing else is being typed in.
+  document.addEventListener("paste", (e) => {
+    const inChat = chatWin.contains(document.activeElement);
+    const typing = !inChat && document.activeElement && document.activeElement.matches("input, textarea, [contenteditable]");
+    if (typing || (!inChat && !stageVisible())) return;
+    const dt = e.clipboardData;
+    const file = dt && [...dt.files].find((f) => f.type.startsWith("image/"));
+    const text = dt ? dt.getData("text/plain") : "";
+    if (file) { e.preventDefault(); sendFile(file); return; }
+    if (clip && (!text || text === CLIP_MARK)) { e.preventDefault(); sendItem(clip); return; }
+    if (inChat) {
+      e.preventDefault();
+      if (text) addMsg("me", text.slice(0, 300));
+      else addMsg("note", "Take a screenshot first: press ⌥⇧S and drag over the chart.");
+    }
+  });
+  composer.addEventListener("keydown", (e) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      const t = composer.textContent.trim();
+      if (t) { addMsg("me", t.slice(0, 300)); composer.textContent = ""; }
+    }
+  });
+  // Drag the card or a shelf screenshot into the chat (or a real image file).
+  function dragOut(el, getItem) {
+    el.draggable = true;
+    el.addEventListener("dragstart", (e) => {
+      const it = getItem(e);
+      if (!it) return e.preventDefault();
+      e.dataTransfer.setData("text/x-sidesnap", String(it.id));
+      e.dataTransfer.setData("text/plain", CLIP_MARK);
+      e.dataTransfer.effectAllowed = "copy";
+    });
+  }
+  dragOut(cardThumb, () => cardItem);
+  list.addEventListener("dragstart", (e) => {
+    const el = e.target.closest && e.target.closest(".item");
+    const it = el && itemOf(el);
+    if (!it) return;
+    e.dataTransfer.setData("text/x-sidesnap", String(it.id));
+    e.dataTransfer.setData("text/plain", CLIP_MARK);
+  });
+  const observeItems = new MutationObserver(() => list.querySelectorAll(".item").forEach((n) => { n.draggable = true; }));
+  observeItems.observe(list, { childList: true });
+  chatWin.addEventListener("dragover", (e) => { e.preventDefault(); e.dataTransfer.dropEffect = "copy"; chatWin.classList.add("drop"); });
+  chatWin.addEventListener("dragleave", (e) => { if (!chatWin.contains(e.relatedTarget)) chatWin.classList.remove("drop"); });
+  chatWin.addEventListener("drop", (e) => {
+    e.preventDefault();
+    chatWin.classList.remove("drop");
+    const id = Number(e.dataTransfer.getData("text/x-sidesnap"));
+    const file = [...e.dataTransfer.files].find((f) => f.type.startsWith("image/"));
+    if (id) sendItem(items.find((i) => i.id === id) || (clip && clip.id === id ? clip : null));
+    else if (file) sendFile(file);
+  });
+
+  // ---------- Try it: the three steps under the demo ----------
+  const steps = [...document.querySelectorAll("#trySteps li")];
+  const doneSteps = new Set();
+  const stepIsDone = (n) => doneSteps.has(n);
+  function showSteps() {
+    const next = [1, 2, 3].find((n) => !doneSteps.has(n));
+    steps.forEach((li) => {
+      const n = Number(li.dataset.step);
+      li.classList.toggle("done", doneSteps.has(n));
+      li.classList.toggle("now", n === next);
+    });
+  }
+  function stepDone(n) { doneSteps.add(n); showSteps(); }
+  showSteps();
 
   // The tab slides in shortly after the page opens.
   renderTab();

@@ -582,7 +582,7 @@ code { font: 0.92em ui-monospace, "SF Mono", Menlo, monospace; padding: 1px 5px;
 .stack-glyph { width: 17px; height: 17px; stroke-width: 1.9; }
 
 /* The window you capture */
-.shot-target { right: 420px; }
+.shot-target { right: 400px; }
 .chart {
   display: flex; align-items: flex-end; gap: 12px; height: 230px; padding: 26px 26px 18px;
 }
@@ -865,3 +865,60 @@ button.mi:hover .sc, button.mi:focus-visible .sc { color: inherit; opacity: 0.8;
   .item, .tab, .card-wrap, .fly { transition-duration: 1ms !important; }
 }
 .card-wrap.show.tuck { transition: opacity 220ms ease, transform 220ms cubic-bezier(0.4, 0, 1, 1); }
+
+/* ----- The chat you paste into ----- */
+.chat-window {
+  position: absolute; top: 66px; right: 124px; width: 256px; height: 254px; z-index: 2;
+  display: flex; flex-direction: column;
+}
+.chat-log {
+  flex: 1; min-height: 0; overflow-y: auto; scrollbar-width: none; overscroll-behavior: contain;
+  display: flex; flex-direction: column; gap: 6px; padding: 10px 10px 4px; font-size: 12px; line-height: 1.3;
+}
+.chat-log::-webkit-scrollbar { display: none; }
+.msg { max-width: 82%; padding: 6px 10px; border-radius: 14px; overflow-wrap: anywhere; }
+.msg b { display: block; font-size: 10.5px; font-weight: 600; color: var(--text-3); margin-bottom: 1px; }
+.msg.them { align-self: flex-start; background: var(--bg-2); color: var(--text); border-bottom-left-radius: 5px; }
+.msg.me { align-self: flex-end; background: var(--accent); color: var(--accent-text); border-bottom-right-radius: 5px; }
+.msg.pic { padding: 3px; background: transparent; border-radius: 12px; }
+.msg.pic .pic-box, .msg.pic img {
+  display: block; position: relative; overflow: hidden; border-radius: 10px;
+  max-width: 180px; max-height: 120px; box-shadow: 0 0 0 1px var(--line);
+}
+.msg.pic img { width: auto; height: auto; }
+.msg.note { align-self: center; max-width: 100%; padding: 2px 0; font-size: 10.5px; color: var(--text-3); }
+.composer {
+  margin: 4px 8px 8px; min-height: 28px; max-height: 60px; overflow-y: auto; padding: 6px 12px;
+  border-radius: 14px; border: 1px solid var(--line-strong); font-size: 12px; line-height: 1.3;
+  color: var(--text); outline: none; cursor: text; transition: border-color 150ms ease, box-shadow 150ms ease;
+}
+.composer:empty::before { content: attr(data-placeholder); color: var(--text-3); pointer-events: none; }
+.composer:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+.chat-window.drop .composer, .chat-window.drop { box-shadow: 0 0 0 3px var(--accent), var(--shadow-lg); }
+.chat-window.nudge .composer { animation: nudge 1.4s ease-in-out 2; }
+@keyframes nudge { 50% { border-color: var(--accent); box-shadow: 0 0 0 4px var(--accent-soft); } }
+
+/* ----- Try it: three steps under the demo ----- */
+.try-steps {
+  display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin: -28px 0 0; padding: 0; list-style: none;
+  font-size: 13px; color: var(--text-2);
+}
+.try-steps li {
+  display: flex; align-items: center; gap: 8px; padding: 6px 12px 6px 6px; border-radius: 999px;
+  border: 1px solid var(--line); background: var(--surface-2); transition: border-color 200ms ease, color 200ms ease, opacity 200ms ease;
+}
+.try-steps kbd { margin: 0 1px; }
+.try-steps .num {
+  display: grid; place-items: center; width: 20px; height: 20px; border-radius: 50%; flex: none;
+  font-size: 11px; font-weight: 600; background: var(--line); color: var(--text-2);
+}
+.try-steps li.now { border-color: var(--accent); color: var(--text); }
+.try-steps li.now .num { background: var(--accent); color: var(--accent-text); }
+.try-steps li.done { opacity: 0.6; }
+.try-steps li.done .num { background: #30d158; color: #fff; font-size: 0; }
+.try-steps li.done .num::after { content: "✓"; font-size: 11px; }
+@media (min-width: 981px) { .stage-hint { display: none; } }
+@media (max-width: 980px) {
+  .try-steps { display: none; }
+  .chat-window { position: relative; inset: auto; width: 100%; height: 240px; order: 2; }
+}

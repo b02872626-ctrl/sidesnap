@@ -73,9 +73,22 @@
             <i style="--h:63%"></i><i style="--h:55%"></i><i style="--h:79%"></i><i class="hi" style="--h:92%"></i>
           </div>
           <div class="window-foot">
-            <span>Press <kbd id="kOpt">⌥</kbd> <kbd id="kShift">⇧</kbd> <kbd id="kS">S</kbd> and drag over this window, or <kbd>⌥</kbd> <kbd>S</kbd> for the whole screen</span>
+            <span>Press <kbd id="kOpt">⌥</kbd> <kbd id="kShift">⇧</kbd> <kbd id="kS">S</kbd> and drag over this chart</span>
             <span>Nothing is saved or sent.</span>
           </div>
+        </div>
+
+        <!-- A chat to paste the screenshot into -->
+        <div class="window chat-window" id="chatWin">
+          <div class="window-bar">
+            <span class="lights" aria-hidden="true"><i></i><i></i><i></i></span>
+            <span class="window-title">Team chat</span>
+          </div>
+          <div class="chat-log" id="chatLog" aria-live="polite">
+            <div class="msg them"><b>Maya</b>Can you send me the sign-ups chart?</div>
+          </div>
+          <div class="composer" id="composer" contenteditable="true" role="textbox" aria-label="Message. Paste a screenshot here"
+               data-placeholder="Paste a screenshot (⌘V)"></div>
         </div>
 
         <!-- Sidesnap itself, at its real sizes, scaled down to fit this little screen -->
@@ -142,7 +155,12 @@
           <div class="mi dim" role="menuitem"><span>Quit Sidesnap</span><span class="sc">⌘Q</span></div>
         </div>
       </div>
-      <p class="stage-hint"><span class="hint-keys">Try it: press ⌥⇧S and drag, or use the Sidesnap menu. Then point at the right edge of the screen.</span><span class="hint-touch">On a Mac, try it here: press ⌥⇧S and drag over the window.</span></p>
+      <ol class="try-steps" id="trySteps" aria-label="Try it">
+        <li data-step="1"><span class="num">1</span><span>Press <kbd>⌥</kbd><kbd>⇧</kbd><kbd>S</kbd> and drag over the chart</span></li>
+        <li data-step="2"><span class="num">2</span><span>Click the chat and press <kbd>⌘</kbd><kbd>V</kbd>, or drag the card in</span></li>
+        <li data-step="3"><span class="num">3</span><span>Point at the right edge to find it again</span></li>
+      </ol>
+      <p class="stage-hint"><span class="hint-touch">On a Mac, try it here: press ⌥⇧S, drag over the chart, then paste it in the chat.</span></p>
     </section>
 
     <!-- What it does -->

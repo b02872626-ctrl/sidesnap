@@ -316,6 +316,8 @@ final class EdgeTabController {
     }
 
     private func hideFan() {
+        // A pending "pointer left" close would otherwise fire later and pop the tab back out.
+        leaveTimer?.invalidate(); leaveTimer = nil
         guard fanShown else { return }
         fanShown = false
         model.hoveredID = nil

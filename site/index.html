@@ -73,7 +73,7 @@
             <i style="--h:63%"></i><i style="--h:55%"></i><i style="--h:79%"></i><i class="hi" style="--h:92%"></i>
           </div>
           <div class="window-foot">
-            <span>Press <kbd id="kOpt">⌥</kbd> <kbd id="kShift">⇧</kbd> <kbd id="kS">S</kbd> and drag over this chart</span>
+            <span>Sign-ups per week</span>
             <span>Nothing is saved or sent.</span>
           </div>
         </div>
@@ -139,6 +139,17 @@
           <div class="mtab"><div class="shot s-terminal"><i></i></div><span id="mCount">3 on shelf</span></div>
         </div>
 
+        <!-- The on-screen guide: a callout that moves to whatever to try next -->
+        <div class="guide" id="guide" role="status" aria-live="polite" hidden>
+          <div class="guide-top">
+            <span class="guide-count" id="guideCount"></span>
+            <span class="guide-dots" aria-hidden="true"><i></i><i></i><i></i></span>
+          </div>
+          <p class="guide-text" id="guideText"></p>
+          <div class="guide-actions" id="guideActions"></div>
+          <span class="guide-arrow" aria-hidden="true"></span>
+        </div>
+
         <!-- Sidesnap's menu -->
         <div class="panel menu hidden" id="panel" role="menu" aria-label="Sidesnap menu">
           <button class="mi" role="menuitem" data-act="area"><span>Capture Area</span><span class="sc">⌥⇧S</span></button>
@@ -155,11 +166,6 @@
           <div class="mi dim" role="menuitem"><span>Quit Sidesnap</span><span class="sc">⌘Q</span></div>
         </div>
       </div>
-      <ol class="try-steps" id="trySteps" aria-label="Try it">
-        <li data-step="1"><span class="num">1</span><span>Press <kbd>⌥</kbd><kbd>⇧</kbd><kbd>S</kbd> and drag over the chart</span></li>
-        <li data-step="2"><span class="num">2</span><span>Click the chat and press <kbd>⌘</kbd><kbd>V</kbd>, or drag the card in</span></li>
-        <li data-step="3"><span class="num">3</span><span>Point at the right edge to find it again</span></li>
-      </ol>
       <p class="stage-hint"><span class="hint-touch">On a Mac, try it here: press ⌥⇧S, drag over the chart, then paste it in the chat.</span></p>
     </section>
 

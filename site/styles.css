@@ -898,27 +898,49 @@ button.mi:hover .sc, button.mi:focus-visible .sc { color: inherit; opacity: 0.8;
 .chat-window.nudge .composer { animation: nudge 1.4s ease-in-out 2; }
 @keyframes nudge { 50% { border-color: var(--accent); box-shadow: 0 0 0 4px var(--accent-soft); } }
 
-/* ----- Try it: three steps under the demo ----- */
-.try-steps {
-  display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin: -28px 0 0; padding: 0; list-style: none;
-  font-size: 13px; color: var(--text-2);
+/* ----- The on-screen guide: a callout that moves to the next thing to try ----- */
+.guide {
+  position: absolute; left: 0; top: 0; z-index: 6; width: 208px; padding: 11px 12px 10px;
+  border-radius: 14px; color: #f5f5f7; font-size: 13px; line-height: 1.35;
+  background: rgba(28, 28, 32, 0.86);
+  backdrop-filter: blur(24px) saturate(1.6); -webkit-backdrop-filter: blur(24px) saturate(1.6);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.12), 0 18px 40px -12px rgba(0, 0, 0, 0.55);
+  transition: transform 520ms var(--ease-spring), opacity 220ms ease;
 }
-.try-steps li {
-  display: flex; align-items: center; gap: 8px; padding: 6px 12px 6px 6px; border-radius: 999px;
-  border: 1px solid var(--line); background: var(--surface-2); transition: border-color 200ms ease, color 200ms ease, opacity 200ms ease;
+.guide[hidden] { display: none; }
+.guide.away { opacity: 0; pointer-events: none; }
+.guide.enter { opacity: 0; }
+.guide-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px; }
+.guide-count { font-size: 11px; font-weight: 600; letter-spacing: 0.02em; color: rgba(245, 245, 247, 0.55); }
+.guide-dots { display: flex; gap: 4px; }
+.guide-dots i { width: 6px; height: 6px; border-radius: 50%; background: rgba(255, 255, 255, 0.2); transition: background-color 200ms ease, width 200ms ease; }
+.guide-dots i.done { background: rgba(255, 255, 255, 0.55); }
+.guide-dots i.now { width: 14px; border-radius: 3px; background: var(--accent); }
+.guide-text { margin: 0; }
+.guide-text strong { display: block; font-size: 14px; font-weight: 600; margin-bottom: 2px; }
+.guide-text span { color: rgba(245, 245, 247, 0.72); }
+.guide kbd { color: #f5f5f7; border-color: rgba(255, 255, 255, 0.28); margin: 0 1px; }
+.guide-actions { display: flex; justify-content: flex-end; align-items: center; gap: 6px; margin-top: 10px; }
+.guide-actions:empty { display: none; }
+.guide-actions button, .guide-actions a {
+  font: inherit; font-size: 12px; font-weight: 500; padding: 4px 10px; border-radius: 7px; border: 0;
+  color: rgba(245, 245, 247, 0.72); background: transparent; cursor: pointer; text-decoration: none;
 }
-.try-steps kbd { margin: 0 1px; }
-.try-steps .num {
-  display: grid; place-items: center; width: 20px; height: 20px; border-radius: 50%; flex: none;
-  font-size: 11px; font-weight: 600; background: var(--line); color: var(--text-2);
+.guide-actions button:hover { color: #f5f5f7; background: rgba(255, 255, 255, 0.08); }
+.guide-actions .primary { color: var(--accent-text); background: var(--accent); }
+.guide-actions .primary:hover { filter: brightness(1.1); }
+.guide-actions :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.guide-arrow {
+  position: absolute; width: 12px; height: 12px; background: rgba(28, 28, 32, 0.86);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.12);
+  clip-path: polygon(0 0, 100% 100%, 0 100%); /* only the outer half, so it reads as one shape */
 }
-.try-steps li.now { border-color: var(--accent); color: var(--text); }
-.try-steps li.now .num { background: var(--accent); color: var(--accent-text); }
-.try-steps li.done { opacity: 0.6; }
-.try-steps li.done .num { background: #30d158; color: #fff; font-size: 0; }
-.try-steps li.done .num::after { content: "✓"; font-size: 11px; }
+.guide[data-side="left"] .guide-arrow  { left: -6px; top: var(--ay, 50%); transform: translateY(-50%) rotate(45deg); }
+.guide[data-side="right"] .guide-arrow { right: -6px; top: var(--ay, 50%); transform: translateY(-50%) rotate(225deg); }
+.guide[data-side="none"] .guide-arrow { display: none; }
+@media (prefers-reduced-motion: reduce) { .guide { transition: opacity 150ms ease; } }
 @media (min-width: 981px) { .stage-hint { display: none; } }
 @media (max-width: 980px) {
-  .try-steps { display: none; }
+  .guide { display: none; }
   .chat-window { position: relative; inset: auto; width: 100%; height: 240px; order: 2; }
 }

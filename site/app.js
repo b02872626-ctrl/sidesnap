@@ -162,6 +162,7 @@
     mode = m;
     start = cur = null;
     pick.className = "pick on" + (m === "window" ? " win" : "");
+    guide.classList.add("away");
     hint.textContent = HINTS[m];
     winHl.classList.remove("on");
   }
@@ -170,7 +171,7 @@
     for (const el of [chatWin, target]) { const r = rectOf(el); if (r.w && inside(p, r)) return { el, r }; }
     return null;
   }
-  function endPick() { mode = null; start = null; pick.className = "pick"; }
+  function endPick() { mode = null; start = null; pick.className = "pick"; guide.classList.remove("away"); }
   function switchMode() {
     mode = mode === "area" ? "window" : "area";
     start = null;
@@ -765,20 +766,89 @@
     else if (file) sendFile(file);
   });
 
-  // ---------- Try it: the three steps under the demo ----------
-  const steps = [...document.querySelectorAll("#trySteps li")];
-  const doneSteps = new Set();
-  const stepIsDone = (n) => doneSteps.has(n);
-  function showSteps() {
-    const next = [1, 2, 3].find((n) => !doneSteps.has(n));
-    steps.forEach((li) => {
-      const n = Number(li.dataset.step);
-      li.classList.toggle("done", doneSteps.has(n));
-      li.classList.toggle("now", n === next);
-    });
+  // ---------- The on-screen guide ----------
+  // A callout that sits next to whatever to try next: the chart, the chat,
+  // then the right edge. Steps count only in order. It is never part of a
+  // screenshot (snapshot() copies only the windows) and steps aside while picking.
+  const guide = $("guide"), stageWrap = $("stageWrap");
+  const gCount = $("guideCount"), gText = $("guideText"), gActions = $("guideActions");
+  const gDots = [...guide.querySelectorAll(".guide-dots i")];
+  const tabEl = $("tab");
+  const K = (k, id) => `<kbd${id ? ` id="${id}"` : ""}>${k}</kbd>`;
+  const STEPS = [
+    { title: "Take a screenshot", body: `Press ${K("⌥", "kOpt")}${K("⇧", "kShift")}${K("S", "kS")}, then drag over the chart.`,
+      // To the right of the chart, pointing at it
+      at: () => { const r = box(target); return { side: "left", x: r.right + 14, y: r.top + r.height * 0.62, minY: box(chatWin).bottom + 14 }; } },
+    { title: "Paste it in the chat", body: `Click the message box and press ${K("⌘")}${K("V")}, or drag the card in.`,
+      // To the left of the chat, pointing at the message box
+      at: () => { const r = box(composer); return { side: "right", x: box(chatWin).left - 14, y: r.top + r.height / 2 }; } },
+    { title: "Find it again later", body: "Point at the right edge of the screen. Every screenshot waits there.",
+      // Pointing at the edge, level with the tab
+      at: () => { const r = box(tabEl), w = box(screenEl); return { side: "right", x: Math.min(r.left, w.right) - 14, y: r.top + r.height / 2 }; } },
+  ];
+  let step = 0, guideOff = false;
+  const stepIsDone = (n) => step >= n;
+  // A rect relative to the stage wrapper.
+  function box(el) {
+    const r = el.getBoundingClientRect(), o = stageWrap.getBoundingClientRect();
+    return { left: r.left - o.left, top: r.top - o.top, right: r.right - o.left, bottom: r.bottom - o.top, width: r.width, height: r.height };
   }
-  function stepDone(n) { doneSteps.add(n); showSteps(); }
-  showSteps();
+  function placeGuide() {
+    if (guide.hidden) return;
+    const gw = guide.offsetWidth, gh = guide.offsetHeight, wrapW = stageWrap.clientWidth;
+    let x, y, side = "none";
+    if (step < STEPS.length) {
+      const a = STEPS[step].at();
+      side = a.side;
+      x = side === "left" ? a.x : a.x - gw;
+      y = Math.max(a.minY || 56, Math.min(a.y - gh / 2, 540 - gh - 16));
+      guide.style.setProperty("--ay", Math.max(14, Math.min(a.y - y, gh - 14)) + "px");
+    } else {
+      // Finished: bottom left of the desktop, clear of the shelf
+      x = box(target).left; y = 540 - gh - 24;
+    }
+    x = Math.max(56, Math.min(x, wrapW - gw - 56));
+    guide.dataset.side = side;
+    guide.style.transform = `translate(${Math.round(x)}px, ${Math.round(y)}px)`;
+  }
+  function renderGuide() {
+    if (guideOff || narrow.matches) { guide.hidden = true; return; }
+    const first = guide.hidden;
+    guide.hidden = false;
+    gDots.forEach((d, i) => { d.className = i < step ? "done" : i === step ? "now" : ""; });
+    if (step < STEPS.length) {
+      const st = STEPS[step];
+      gCount.textContent = `${step + 1} of ${STEPS.length}`;
+      gText.innerHTML = `<strong>${st.title}</strong><span>${st.body}</span>`;
+      gActions.innerHTML = `<button type="button" data-g="skip">Skip guide</button>`;
+    } else {
+      gCount.textContent = "Done";
+      gText.innerHTML = "<strong>That's Sidesnap</strong><span>Capture, paste, and find it again at the edge. Free for Mac.</span>";
+      gActions.innerHTML = `<button type="button" data-g="again">Try again</button><a class="primary" href="downloads/Sidesnap.dmg" download data-g="download">Download</a>`;
+    }
+    if (first) {
+      // Appear in place, without sliding in from the corner.
+      guide.style.transition = "none"; guide.classList.add("enter");
+      placeGuide(); void guide.offsetWidth;
+      guide.style.transition = ""; guide.classList.remove("enter");
+    } else placeGuide();
+  }
+  function stepDone(n) {
+    if (n !== step + 1) return;   // only the next step counts
+    step = n;
+    renderGuide();
+  }
+  gActions.addEventListener("click", (e) => {
+    const b = e.target.closest("[data-g]");
+    if (!b) return;
+    if (b.dataset.g === "skip") { guideOff = true; renderGuide(); }
+    if (b.dataset.g === "again") { step = 0; renderGuide(); }
+  });
+  window.addEventListener("resize", () => { if (!guideOff) renderGuide(); });
+  narrow.addEventListener("change", renderGuide);
+  // Follow the tab while it slides (step 3 points at it).
+  tabEl.addEventListener("transitionend", placeGuide);
+  setTimeout(renderGuide, 900);
 
   // The tab slides in shortly after the page opens.
   renderTab();

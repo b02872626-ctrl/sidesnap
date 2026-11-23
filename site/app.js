@@ -53,6 +53,15 @@
   const fmtTime = (t) => new Date(t).toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" });
 
   const target = $("target");
+  // Week labels: the Mondays of the last 8 weeks, ending with this one.
+  {
+    const d = new Date(); d.setDate(d.getDate() - ((d.getDay() + 6) % 7));
+    const fmt = (t) => t.toLocaleDateString(undefined, { month: "short", day: "numeric" });
+    $("xlabels").innerHTML = Array.from({ length: 8 }, (_, i) => {
+      const t = new Date(d); t.setDate(d.getDate() - 7 * (7 - i));
+      return `<span>${fmt(t)}</span>`;
+    }).join("");
+  }
   const chatWin = $("chatWin");
   const bar = document.querySelector(".stage-bar");
 
@@ -226,8 +235,8 @@
 
   // The words on the page inside an area (stands in for reading the pixels).
   function textIn(r) {
-    const els = [target.querySelector(".window-title"), ...target.querySelectorAll(".window-foot > span"),
-      bar.querySelector("strong"), $("clock"), chatWin.querySelector(".window-title"), ...chatLog.querySelectorAll(":scope > .msg:not(.pic)")];
+    const els = [target.querySelector(".window-title"), ...target.querySelectorAll(".kpi-label, .kpi b, .delta, .vs, .xlabels span, .window-foot > span"),
+      bar.querySelector("strong"), $("clock"), chatWin.querySelector(".window-title"), ...chatLog.querySelectorAll(":scope > .msg:not(.pic):not(.typing)")];
     const parts = [];
     for (const el of els) {
       if (!el) continue;
@@ -693,15 +702,31 @@
     chatLog.scrollTop = chatLog.scrollHeight;
     return m;
   }
+  // "Delivered" under your newest message; "Read" once Maya starts typing.
+  const receipt = document.createElement("div");
+  receipt.className = "receipt";
+  function sent() {
+    receipt.textContent = "Delivered";
+    chatLog.append(receipt);
+    chatLog.scrollTop = chatLog.scrollHeight;
+  }
   function sendPicture(node) {
     addMsg("me pic", node);
+    sent();
     chatWin.classList.remove("nudge");
     stepDone(2);
     clearTimeout(replyTimer);
+    chatLog.querySelectorAll(".typing").forEach((n) => n.remove());
     replyTimer = setTimeout(() => {
-      const m = addMsg("them", replies[replyN++ % replies.length]);
-      m.insertAdjacentHTML("afterbegin", "<b>Maya</b>");
-    }, 1100);
+      receipt.textContent = "Read";
+      const dots = addMsg("them typing", "");
+      dots.innerHTML = "<i></i><i></i><i></i>";
+      replyTimer = setTimeout(() => {
+        dots.remove();
+        receipt.remove();
+        addMsg("them", replies[replyN++ % replies.length]);
+      }, 1100);
+    }, 600);
   }
   function sendItem(item) { if (item) sendPicture(pictureOf(item, 180, 120)); }
   function sendFile(file) {
@@ -723,17 +748,23 @@
     if (clip && (!text || text === CLIP_MARK)) { e.preventDefault(); sendItem(clip); return; }
     if (inChat) {
       e.preventDefault();
-      if (text) addMsg("me", text.slice(0, 300));
+      if (text) { addMsg("me", text.slice(0, 300)); sent(); }
       else addMsg("note", "Take a screenshot first: press ⌥⇧S and drag over the chart.");
     }
   });
+  const chatSend = $("chatSend");
+  function sendTyped() {
+    const t = composer.textContent.trim();
+    if (t) { addMsg("me", t.slice(0, 300)); sent(); }
+    composer.textContent = "";
+    chatSend.disabled = true;
+  }
   composer.addEventListener("keydown", (e) => {
-    if (e.key === "Enter" && !e.shiftKey) {
-      e.preventDefault();
-      const t = composer.textContent.trim();
-      if (t) { addMsg("me", t.slice(0, 300)); composer.textContent = ""; }
-    }
+    if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); sendTyped(); }
   });
+  composer.addEventListener("input", () => { chatSend.disabled = !composer.textContent.trim(); });
+  chatSend.addEventListener("click", sendTyped);
+  $("chatDay").textContent = "Today " + fmtTime(Date.now() - 4 * 60000);
   // Drag the card or a shelf screenshot into the chat (or a real image file).
   function dragOut(el, getItem) {
     el.draggable = true;

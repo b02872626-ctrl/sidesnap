@@ -68,27 +68,44 @@
             <span class="lights" aria-hidden="true"><i></i><i></i><i></i></span>
             <span class="window-title">Weekly sign-ups</span>
           </div>
-          <div class="chart" aria-hidden="true">
-            <i style="--h:34%"></i><i style="--h:46%"></i><i style="--h:41%"></i><i style="--h:58%"></i>
-            <i style="--h:63%"></i><i style="--h:55%"></i><i style="--h:79%"></i><i class="hi" style="--h:92%"></i>
+          <div class="chart-head">
+            <div>
+              <span class="kpi-label">Sign-ups this week</span>
+              <span class="kpi"><b>2,481</b><span class="delta">▲ 18%</span><span class="vs">vs last week</span></span>
+            </div>
+            <span class="seg" aria-hidden="true"><span>4W</span><span class="on">8W</span><span>12W</span></span>
           </div>
+          <div class="chart" aria-hidden="true">
+            <div class="grid"><div style="--y:0%"><span>0</span></div><div style="--y:33.33%"><span>1k</span></div><div style="--y:66.67%"><span>2k</span></div><div style="--y:100%"><span>3k</span></div></div>
+            <i style="--h:30.7%"></i><i style="--h:41.3%"></i><i style="--h:37.0%"></i><i style="--h:52.7%"></i><i style="--h:57.3%"></i><i style="--h:51.0%"></i><i style="--h:70.0%"></i><i style="--h:82.7%" class="hi" data-v="2,481"></i>
+          </div>
+          <div class="xlabels" id="xlabels" aria-hidden="true"></div>
           <div class="window-foot">
-            <span>Sign-ups per week</span>
+            <span>Updated just now</span>
             <span>Nothing is saved or sent.</span>
           </div>
         </div>
 
         <!-- A chat to paste the screenshot into -->
         <div class="window chat-window" id="chatWin">
-          <div class="window-bar">
+          <div class="window-bar chat-bar">
             <span class="lights" aria-hidden="true"><i></i><i></i><i></i></span>
-            <span class="window-title">Team chat</span>
+            <span class="chat-who">
+              <span class="avatar" aria-hidden="true">MC</span>
+              <span class="who-text"><span class="window-title">Maya Chen</span><span class="presence">Online</span></span>
+            </span>
           </div>
           <div class="chat-log" id="chatLog" aria-live="polite">
-            <div class="msg them"><b>Maya</b>Can you send me the sign-ups chart?</div>
+            <div class="day" id="chatDay">Today</div>
+            <div class="msg them">Can you send me the sign-ups chart?</div>
           </div>
-          <div class="composer" id="composer" contenteditable="true" role="textbox" aria-label="Message. Paste a screenshot here"
-               data-placeholder="Paste a screenshot (⌘V)"></div>
+          <div class="composer-row">
+            <div class="composer" id="composer" contenteditable="true" role="textbox" aria-label="Message. Paste a screenshot here"
+                 data-placeholder="Paste a screenshot (⌘V)"></div>
+            <button class="send" id="chatSend" type="button" aria-label="Send" disabled>
+              <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 13V3.5M4 7.5l4-4 4 4"/></svg>
+            </button>
+          </div>
         </div>
 
         <!-- Sidesnap itself, at its real sizes, scaled down to fit this little screen -->

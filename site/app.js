@@ -881,9 +881,16 @@
   tabEl.addEventListener("transitionend", placeGuide);
   setTimeout(renderGuide, 900);
 
-  // The tab slides in shortly after the page opens.
+  // Shortly after the page opens the tab peeks in as a sliver, so the guide's
+  // first step has the desktop to itself; pointing at the edge brings it out.
   renderTab();
-  setTimeout(() => { if (!cardShowing) { tab.classList.add("instant", "hidden"); void tab.offsetWidth; touch(); } }, 700);
+  setTimeout(() => {
+    if (cardShowing || dock === "tab") return;   // already brought out by pointing at the edge
+    tab.classList.add("instant", "hidden"); void tab.offsetWidth;
+    clearIdle();
+    setDock("sliver");
+    idle.push(setTimeout(() => setDock("hidden"), 300000));
+  }, 700);
 
   // ---------- Install: play the three steps in turn while visible ----------
 
